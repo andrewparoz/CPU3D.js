@@ -9,7 +9,7 @@ var timeCounter = 0;
 function main() {
 	canvas = document.getElementById("screen");
 	
-	render = new CPU3D(canvas, callback, 0, "./cpu3d.min.js");
+	render = new CPU3D(canvas, callback, 0, "cpu3d.min.js");
 	render.initialise(canvas.width, canvas.height);
 	render.clearColor(0, 0, 0, 0);
 
@@ -31,10 +31,13 @@ function main() {
 	
 	render.setProperty("PROP_ENABLE_BACKFACECULL", false);
 	
-	var persMatrix = createPrespectiveMatrix(85, canvas.width/canvas.height, 0.1, 100);
+	var persMatrix = new CPU3D_Matrix()
+	persMatrix.makePrespectiveMatrix(85, canvas.width/canvas.height, 0.1, 100);
+
 	render.setShaderVariable("VERTEX_perspectiveMatrix", persMatrix);
-	draw();
 	
+	draw();
+
 	return;
 }
 
@@ -44,7 +47,7 @@ function main() {
 function draw() {
 	timeCounter += 0.01;
 
-	var objectMatrix = new Matrix();
+	var objectMatrix = new CPU3D_Matrix();
 	objectMatrix.makeTranslationMatrix(0, 0, -3);
 	objectMatrix.makeXRotationMatrix(0.6);
 	objectMatrix.makeYRotationMatrix(timeCounter/5);
@@ -131,24 +134,4 @@ function loadModel() {
 	0,-1,1,-1,0,0,-1,-1,-1,0,1,-1,-1,1,1,1,-1,1,1,1,0];
 	verticesLength = 36;
 	render.loadVBO(vbo, vertices);
-}
-
-//----------------------------------------------------------------
-// Perspective Matrix
-//----------------------------------------------------------------
-function createPrespectiveMatrix(fieldOfView, aspectRatio, near, far) {	
-	var top = near*Math.tan(fieldOfView * 3.14159265/360);
-	var bottom = -top;	
-	var right = top*aspectRatio;
-	var left = -right;
-	
-	var result = new Matrix();
-	result.set(0, 0, (2*near) / (right-left));
-	result.set(1, 1, (2*near) / (top-bottom));
-	result.set(2, 2, (near+far) / (far-near));
-	result.set(3, 2, -1);
-	result.set(2, 3, (2*near*far)/(far-near));
-	result.set(3, 3, 0);
-	
-	return result;
 }
