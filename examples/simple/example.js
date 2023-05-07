@@ -9,7 +9,7 @@ var timeCounter = 0;
 function main() {
 	canvas = document.getElementById("screen");
 	
-	render = new CPU3D(canvas, callback, 0, ".../../src/CPU3D.js");
+	render = new CPU3D(canvas, callback, 0, "./cpu3d.min.js");
 	render.initialise(canvas.width, canvas.height);
 	render.clearColor(0, 0, 0, 0);
 
