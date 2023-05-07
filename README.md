@@ -12,3 +12,5 @@ As CPU3D.js is completely written in Javascript without any external plugins or 
 
 # Future Updates
 Since this was started in 2014, and development stopped in 2016, the library needs considerable updating to more modern JavaScript standards. This is the main priority at the moment, as well as providing more examples of work using the library for other developers to learn from.
+
+**Very soon a combined minified version of the library needs to be added, along with a script to build that.**
