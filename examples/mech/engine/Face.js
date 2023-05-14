@@ -1,0 +1,47 @@
+class Face {
+	///////////////////////////////////////////////////////////////////////////////
+	// Properites
+	///////////////////////////////////////////////////////////////////////////////
+	#vertices;
+    #uvs;
+    #normal;
+    #material;
+
+	///////////////////////////////////////////////////////////////////////////////
+	// Constructor
+	///////////////////////////////////////////////////////////////////////////////
+	constructor(data) {
+
+		if (data == null) {
+			return;
+		}
+
+		this.vertices = data.vertexIndex;
+
+		this.uvs = new Array();
+		for(let i = 0; i < data.uvs.length; i++) {
+			this.uvs.push(new Vector2D(data.uvs[i][0], data.uvs[i][1]));
+		}
+
+		this.normal = new Vector3D(data.normal[0], data.normal[1], data.normal[2]);
+
+		this.materialIndex = data.materialIndex;
+
+		return;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// Functions
+	///////////////////////////////////////////////////////////////////////////////
+	getVertexByIndex = function(index) {
+		return this.vertices[index];
+	}
+	
+	getNormal = function() {
+		return this.normal;
+	}
+
+	getUVByIndex = function(index) {
+		return this.uvs[index];
+	}
+}
