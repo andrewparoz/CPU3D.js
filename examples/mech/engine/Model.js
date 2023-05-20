@@ -9,6 +9,7 @@ class Model {
 	#vertices;
 	#faces;
 	#bones;
+	#animations;
 	#materials;	//replaced texture paths with tbo's
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +34,14 @@ class Model {
 			this.faces.push(new Face(data.faces[i]))
 		}
 		this.bones = new Array();
+		for(let i = 0; i < data.bones.length; i++) {
+			this.bones.push(new Bone(data.bones[i]))
+		}
+		this.updateBoneIndices();
+		this.animations = new Array();
+		for(let i = 0; i < data.animations.length; i++) {
+			this.animations.push(new Anim(data.animations[i]))
+		}
 		this.materials = new Array();
 		
 		/*
@@ -75,5 +84,61 @@ class Model {
 	}
 	getFaceByIndex = function(index) {
 		return this.faces[index];
+	}
+	getBoneByIndex = function(index) {
+		return this.bone[index];
+	}
+	getAnimationByIndex = function(index) {
+		return this.animations[index];
+	}
+
+
+	//updates the indexs for bones
+	updateBoneIndices = function() {
+		
+		for(let i = 0; i < this.bones.length; i++) {
+			let found = false;
+			let parentName = this.bones[i].getParent();
+			for(let j = 0; j < this.bones.length && !found; j++) {
+				if (parentName === this.bones[j]) {
+					this.bones[i].setParentIndex(j);
+					found = true;
+				}
+			}
+		}
+	}
+
+	getBoneAnimMatrixs = function(animation, time) {
+
+		let anim = this.getAnimationByIndex(animation);
+
+		//generate matrix for each bone
+		let boneMatrixs = new Array(this.bones.length);
+		for(let i = 0; i < this.bones.length; i++) {
+			let bone = this.bones[i];
+			
+			let matT = new CPU3D_Matrix();
+			matT.makeTranslationMatrix(bone.getPosition().getX(), bone.getPosition().getY(), bone.getPosition().getZ());
+			//transform.translate(key.x, key.y, key.z);
+			//transform.multiplyWithMatrix(&Animation::convertQuatToMatrix(&key.rx, &key.ry, &key.rz, &key.rw));
+			//transform.scale(key.sx, key.sy, key.sz);
+
+			let aBone = anim.getBoneByIndex(i);
+			let key = aBone.getKeyframeByIndex(time % 30);
+
+			//get Animation matrix for each bone
+			let animT = new CPU3D_Matrix();
+			animT.makeTranslationMatrix(key.getPosition().getX(), key.getPosition().getY(), key.getPosition().getZ());
+
+			matT.multiplyWithMatrix(animT);
+			boneMatrixs[i] = matT;
+		}
+
+		//calculate bone heiarchy
+		for(let i = 0; i < this.bones.length; i++) {
+
+		}
+
+		return boneMatrixs;
 	}
 }

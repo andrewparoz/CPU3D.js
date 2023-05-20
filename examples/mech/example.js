@@ -6,7 +6,10 @@ var tbo;
 
 var timeCounter = 0;
 
+var model;
+
 function main() {
+
 	canvas = document.getElementById("screen");
 	
 	render = new CPU3D(canvas, callback, 0, "cpu3d.min.js");
@@ -41,6 +44,8 @@ function main() {
 
 	render.setShaderVariable("VERTEX_perspectiveMatrix", persMatrix);
 	
+	setInterval(updateFPS, 1000);
+	
 	draw();
 
 	return;
@@ -51,12 +56,19 @@ function main() {
 //----------------------------------------------------------------
 function draw() {
 	timeCounter += 0.01;
+	frameCount += 1;
 
 	var objectMatrix = new CPU3D_Matrix();
 	objectMatrix.makeTranslationMatrix(0, 0, -10);
-	objectMatrix.makeXRotationMatrix(0.6);
-	objectMatrix.makeYRotationMatrix(timeCounter/5);
+	//objectMatrix.makeXRotationMatrix(0.6);
+	//objectMatrix.makeYRotationMatrix(timeCounter/5);
 	render.setShaderVariable("VERTEX_objectMatrix", objectMatrix);
+
+	if (model != null) {
+		render.setShaderVariable("VERTEX_boneMatrix", model.getBoneAnimMatrixs(0, frameCount % 30)[0]);
+	} else {
+		render.setShaderVariable("VERTEX_boneMatrix", new CPU3D_Matrix());
+	}
 	
 	render.bindTBO(tbo, 0);
 	
@@ -69,11 +81,20 @@ function callback() {
 	setTimeout(draw, 0);
 }
 
+var frameCount = 0;
+function updateFPS() {
+	var fpsElement = document.getElementById("fps");
+	fpsElement.innerHTML = this.frameCount;
+	frameCount = 0;
+	return;
+}	
+
 //----------------------------------------------------------------
 // Shaders
 //----------------------------------------------------------------
 var VERTEX_objectMatrix;
 var VERTEX_perspectiveMatrix;
+var VERTEX_boneMatrix;
 
 var VERTEX_normal = new Float32Array(4);
 
@@ -88,10 +109,11 @@ function vertexShader(render, inputVertex, outputVertex) {
 	outputVertex[5] = inputVertex[7]; //v
 
 	//render.vecByMatrixCol(outputVertex, VERTEX_objectMatrix.data, 0);	
-	//render.vecByMatrixCol(outputVertex, VERTEX_cameraProjectionMatrix.data, 0);	
+	//render.vecByMatrixCol(outputVertex, VERTEX_cameraProjectionMatrix.data, 0);
 
-	render.vecByMatrixCol(outputVertex, VERTEX_objectMatrix.data, 0);
-	render.vecByMatrixCol(outputVertex, VERTEX_perspectiveMatrix.data, 0);
+	render.vecByMatrixCol(outputVertex, VERTEX_boneMatrix.getData(), 0);
+	render.vecByMatrixCol(outputVertex, VERTEX_objectMatrix.getData(), 0);
+	render.vecByMatrixCol(outputVertex, VERTEX_perspectiveMatrix.getData(), 0);
 	
 	//do checks on the normal map here
 	VERTEX_normal[0] = inputVertex[3];
@@ -169,7 +191,7 @@ function loadTexture(tbo) {
 function loadModel() {
 
 	//Place any model loading code here.
-	$.getJSON("./mech.json", "", modelLoaded);
+	$.getJSON("./cube.json", "", modelLoaded);
 	verticesLength = 36;
 	render.loadVBO(vbo, []);
 

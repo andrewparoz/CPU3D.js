@@ -1,39 +1,35 @@
-class Vector3D {
+class BoneAnim {
 	///////////////////////////////////////////////////////////////////////////////
 	// Properites
 	///////////////////////////////////////////////////////////////////////////////
-	#data;
+	#keyframes;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Constructor
 	///////////////////////////////////////////////////////////////////////////////
-	constructor(x, y, z) {
-		this.data = [x, y, z];
+	constructor(data) {
+		if (data == null) {
+			this.keyframes = [];
+		} else {
+			this.keyframes = new Array();
+			for(let i = 0; i < data.length; i++) {
+				this.keyframes.push(new Keyframe(data[i]))
+			}
+		}
 		return;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Functions
 	///////////////////////////////////////////////////////////////////////////////
-	getX = function() {
-		return this.data[0];
+	getNumKeyframes() {
+		return this.keyframes.length;
 	}
-	setX = function(x) {
-		this.data[0] = x;
-		return;
+	getKeyframeByIndex(index) {
+		return this.keyframes[index];
 	}
-	getY = function() {
-		return this.data[1];
-	}
-	setY = function(y) {
-		this.data[1] = y;
-		return;
-	}
-	getZ = function() {
-		return this.data[2];
-	}
-	setZ = function(z) {
-		this.data[2] = z;
+	setKeyframes(keyframes) {
+		this.tikeyframese = keyframes;
 		return;
 	}
 }

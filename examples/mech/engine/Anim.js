@@ -1,39 +1,42 @@
-class Vector3D {
+class Anim {
 	///////////////////////////////////////////////////////////////////////////////
 	// Properites
 	///////////////////////////////////////////////////////////////////////////////
-	#data;
+	#repeat;
+	#markers;
+	#duration;
+	#name;
+	#bones;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Constructor
 	///////////////////////////////////////////////////////////////////////////////
-	constructor(x, y, z) {
-		this.data = [x, y, z];
+	constructor(data) {
+
+		if (data == null) {
+			
+			return;
+		}
+		this.repeat = data.repeat;
+		this.markers = data.markers;
+		this.duration = data.duration;
+		this.name = data.name;
+		this.bones = new Array();
+		for(let i = 0; i < data.bones.length; i++) {
+			this.bones.push(new BoneAnim(data.bones[i]))
+		}
+		
 		return;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Functions
 	///////////////////////////////////////////////////////////////////////////////
-	getX = function() {
-		return this.data[0];
+	getNumBones = function() {
+		return this.bones.length;
 	}
-	setX = function(x) {
-		this.data[0] = x;
-		return;
-	}
-	getY = function() {
-		return this.data[1];
-	}
-	setY = function(y) {
-		this.data[1] = y;
-		return;
-	}
-	getZ = function() {
-		return this.data[2];
-	}
-	setZ = function(z) {
-		this.data[2] = z;
-		return;
+	
+	getBoneByIndex = function(index) {
+		return this.bones[index];
 	}
 }
