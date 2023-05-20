@@ -63,6 +63,10 @@ class CPU3D_Matrix {
 		return;
 	}
 
+	getData = function() {
+		return this.data;
+	}
+
 	multiplyWithMatrix = function(m2) {
 		//0
 		this.mulTemp[0]  = m2.data[0] * this.data[0]  + m2.data[1] * this.data[4]  + m2.data[2] * this.data[8]   + m2.data[3] * this.data[12];
@@ -301,5 +305,36 @@ class CPU3D_Matrix {
 		this.matTempIndentity();
 		this.multiplyWithMatrix(result);
 		return;
+	}
+
+	static convertQuatToMatrix = function(x, y, z, w) {
+		let xx = x * x;
+		let xy = x * y;
+		let xz = x * z;
+		let xw = x * w;
+		let yy = y * y;
+		let yz = y * z;
+		let yw = y * w;
+		let zz = z * z;
+		let zw = z * w;
+	
+		let mat = new Matrix();
+		mat.set(0, 0, 1 - 2 * (yy + zz));
+		mat.set(1, 0, 2 * (xy + zw));
+		mat.set(2, 0, 2 * (xz - yw));
+		mat.set(3, 0, 0);
+		mat.set(0, 1, 2 * (xy - zw));
+		mat.set(1, 1, 1 - 2 * (xx + zz));
+		mat.set(2, 1, 2 * (yz + xw));
+		mat.set(3, 1, 0);
+		mat.set(0, 2, 2 * (xz + yw));
+		mat.set(1, 2, 2 * (yz - xw));
+		mat.set(2, 2, 1 - 2 * (xx + yy));
+		mat.set(3, 2, 0);
+		mat.set(0, 3, 0);
+		mat.set(1, 3, 0);
+		mat.set(2, 3, 0);
+		mat.set(3, 3, 1);
+		return mat;
 	}
 }
