@@ -24,8 +24,7 @@ class Anim {
 		this.bones = new Array();
 		for(let i = 0; i < data.bones.length; i++) {
 			this.bones.push(new BoneAnim(data.bones[i]))
-		}
-		
+		}		
 		return;
 	}
 

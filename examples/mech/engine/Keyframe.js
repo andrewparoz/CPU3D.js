@@ -4,7 +4,7 @@ class Keyframe {
 	///////////////////////////////////////////////////////////////////////////////
 	#time;
 	#position;
-	#rotation;
+	#rotation; //stored as Quaternion
 	#scale;
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -14,12 +14,12 @@ class Keyframe {
 		if (data == null) {
 			this.time = 0;
 			this.position = new Vector3D(0, 0, 0);
-			this.rotation = new Vector3D(0, 0, 0);
+			this.rotation = new Quaternion(0, 0, 0, 1);
 			this.scale = new Vector3D(1, 1, 1);
 		} else {
 			this.time = data.time;
 			this.position = new Vector3D(data.position[0], data.position[1], data.position[2])
-			this.rotation = Utility.convertQuaterionToEular(data.rotation[0], data.rotation[1], data.rotation[2], data.rotation[3]);
+			this.rotation = new Quaternion(data.rotation[0], data.rotation[1], data.rotation[2], data.rotation[3]);
 			this.scale = new Vector3D(data.scale[0], data.scale[1], data.scale[2]);
 		}
 		return;

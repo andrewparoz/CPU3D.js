@@ -318,7 +318,7 @@ class CPU3D_Matrix {
 		let zz = z * z;
 		let zw = z * w;
 	
-		let mat = new Matrix();
+		let mat = new CPU3D_Matrix();
 		mat.set(0, 0, 1 - 2 * (yy + zz));
 		mat.set(1, 0, 2 * (xy + zw));
 		mat.set(2, 0, 2 * (xz - yw));

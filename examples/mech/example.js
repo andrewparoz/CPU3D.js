@@ -8,6 +8,10 @@ var timeCounter = 0;
 
 var model;
 
+var prevTime = 0;
+
+var camera;
+
 function main() {
 
 	canvas = document.getElementById("screen");
@@ -22,6 +26,7 @@ function main() {
 	render.addSBOVertexAttribute(shaderID, "VERTEX", "position", 3);
 	render.addSBOVertexAttribute(shaderID, "VERTEX", "normal", 3);
 	render.addSBOVertexAttribute(shaderID, "VERTEX", "texcoord", 2);
+	render.addSBOVertexAttribute(shaderID, "VERTEX", "bone", 4);
 	render.addSBOVertexAttribute(shaderID, "PIXEL", "position", 4);
 	render.addSBOVertexAttribute(shaderID, "PIXEL", "texcoord", 2);
 	render.addSBOVertexAttribute(shaderID, "PIXEL", "none", 1);
@@ -41,11 +46,17 @@ function main() {
 	
 	var persMatrix = new CPU3D_Matrix()
 	persMatrix.makePrespectiveMatrix(85, canvas.width/canvas.height, 0.1, 100);
-
 	render.setShaderVariable("VERTEX_perspectiveMatrix", persMatrix);
 	
+	let camObj = new GameObject(0, "CAMERA");
+	camera = new GameReference();
+	camera.setPosition(0, 3, 10);
+	camera.setRotation(0, 0, 0);
+	camera.setBaseObject(camObj);
+
 	setInterval(updateFPS, 1000);
 	
+	prevTime = new Date().getTime();
 	draw();
 
 	return;
@@ -55,25 +66,38 @@ function main() {
 // Draw Loop
 //----------------------------------------------------------------
 function draw() {
-	timeCounter += 0.01;
+
+	let newTime = new Date().getTime();
+	let msPassed = newTime - prevTime;
+	prevTime = newTime;
+
+	if (msPassed < 1) {
+		msPassed = 1;
+	}
+
+	timeCounter += msPassed;
+
 	frameCount += 1;
 
+	render.clearBuffer(0);
+	render.bindTBO(tbo, 0);
+
+	camPos = camera.getPosition();
+
 	var objectMatrix = new CPU3D_Matrix();
-	objectMatrix.makeTranslationMatrix(0, 0, -10);
-	//objectMatrix.makeXRotationMatrix(0.6);
+	objectMatrix.makeTranslationMatrix(-camPos.getX(), -camPos.getY(), -camPos.getZ());
+	objectMatrix.makeYRotationMatrix(camera.getRotation().getY());
 	//objectMatrix.makeYRotationMatrix(timeCounter/5);
 	render.setShaderVariable("VERTEX_objectMatrix", objectMatrix);
 
 	if (model != null) {
-		render.setShaderVariable("VERTEX_boneMatrix", model.getBoneAnimMatrixs(0, frameCount % 30)[0]);
+		render.setShaderVariable("VERTEX_boneMatrix", model.getBoneAnimMatrixs(0, Math.round((timeCounter/30))));
 	} else {
-		render.setShaderVariable("VERTEX_boneMatrix", new CPU3D_Matrix());
+		render.setShaderVariable("VERTEX_boneMatrix", [new CPU3D_Matrix()]);
 	}
-	
-	render.bindTBO(tbo, 0);
-	
-	render.clearBuffer(0);
+
 	render.draw(vbo, 0, verticesLength);
+
 	render.getBuffer();
 }
 
@@ -88,6 +112,8 @@ function updateFPS() {
 	frameCount = 0;
 	return;
 }	
+
+
 
 //----------------------------------------------------------------
 // Shaders
@@ -111,7 +137,10 @@ function vertexShader(render, inputVertex, outputVertex) {
 	//render.vecByMatrixCol(outputVertex, VERTEX_objectMatrix.data, 0);	
 	//render.vecByMatrixCol(outputVertex, VERTEX_cameraProjectionMatrix.data, 0);
 
-	render.vecByMatrixCol(outputVertex, VERTEX_boneMatrix.getData(), 0);
+	if (!isNaN(inputVertex[8])) {
+		//console.log(inputVertex[8])
+		render.vecByMatrixCol(outputVertex, VERTEX_boneMatrix[inputVertex[8]].getData(), 0);
+	}
 	render.vecByMatrixCol(outputVertex, VERTEX_objectMatrix.getData(), 0);
 	render.vecByMatrixCol(outputVertex, VERTEX_perspectiveMatrix.getData(), 0);
 	
@@ -191,7 +220,7 @@ function loadTexture(tbo) {
 function loadModel() {
 
 	//Place any model loading code here.
-	$.getJSON("./cube.json", "", modelLoaded);
+	$.getJSON("./mech.json", "", modelLoaded);
 	verticesLength = 36;
 	render.loadVBO(vbo, []);
 
@@ -204,7 +233,7 @@ var modelLoaded = function(req) {
 	model = new Model(req);
 
 	verticesLength = model.faces.length*3;
-	let verticesData = new Float32Array(verticesLength*8);
+	let verticesData = new Float32Array(verticesLength*12);
 
 	let i = 0;
 	for (let j = 0; j < model.faces.length; j++) {
@@ -231,8 +260,18 @@ var modelLoaded = function(req) {
 			i++;
 			verticesData[i] = uv.getY();
 			i++;
+
+			for(let m = 0; m < 2; m++) {
+				let bone = vertex.getBoneByIndex(m);
+				verticesData[i] = bone.getBoneIndex();
+				i++;
+				verticesData[i] = bone.getWeight();
+				i++;
+			}
 		}
 	}
+
+	console.log(model);
 
 	render.loadVBO(vbo, verticesData);	
 	return;

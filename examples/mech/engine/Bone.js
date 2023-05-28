@@ -7,6 +7,7 @@ class Bone {
 	#parentIndex;
 
 	#position;
+	#positionWorld;
 	#rotation;
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +20,7 @@ class Bone {
 			this.parent = "";
 			this.parentIndex = -1;
 			this.position = new Vector3D(0, 0, 0);
+			this.positionWorld = new Vector3D(0, 0, 0);
 			this.rotation = new Vector3D(0, 0, 0);
 			return;
 		}
@@ -27,6 +29,7 @@ class Bone {
 		this.parent = data.parent;
 		this.parentIndex = -1; //this is filled in later
 		this.position = new Vector3D(data.position[0], data.position[1], data.position[2]);
+		this.positionWorld = new Vector3D(data.positionWorld[0], data.positionWorld[1], data.positionWorld[2]);
 		this.rotation = new Vector3D(0, 0, 0);
 
 		return;
@@ -61,6 +64,13 @@ class Bone {
 	}
 	setPosition(position) {
 		this.position = position;
+		return;
+	}
+	getPositionWorld() {
+		return this.positionWorld;
+	}
+	setPositionWorld(positionWorld) {
+		this.positionWorld = positionWorld;
 		return;
 	}
 	getRotation() {

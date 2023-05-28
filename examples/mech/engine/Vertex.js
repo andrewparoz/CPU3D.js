@@ -33,4 +33,7 @@ class Vertex {
 	getPosition = function() {
 		return this.position;
 	}
+	getBoneByIndex = function(index) {
+		return this.bones[index];
+	}
 }

@@ -100,7 +100,7 @@ class Model {
 			let found = false;
 			let parentName = this.bones[i].getParent();
 			for(let j = 0; j < this.bones.length && !found; j++) {
-				if (parentName === this.bones[j]) {
+				if (parentName === this.bones[j].getName()) {
 					this.bones[i].setParentIndex(j);
 					found = true;
 				}
@@ -118,27 +118,53 @@ class Model {
 			let bone = this.bones[i];
 			
 			let matT = new CPU3D_Matrix();
-			matT.makeTranslationMatrix(bone.getPosition().getX(), bone.getPosition().getY(), bone.getPosition().getZ());
-			//transform.translate(key.x, key.y, key.z);
-			//transform.multiplyWithMatrix(&Animation::convertQuatToMatrix(&key.rx, &key.ry, &key.rz, &key.rw));
-			//transform.scale(key.sx, key.sy, key.sz);
 
 			let aBone = anim.getBoneByIndex(i);
-			let key = aBone.getKeyframeByIndex(time % 30);
+			let key = aBone.getKeyframeByIndex(time % 180);
 
 			//get Animation matrix for each bone
 			let animT = new CPU3D_Matrix();
 			animT.makeTranslationMatrix(key.getPosition().getX(), key.getPosition().getY(), key.getPosition().getZ());
 
+			let animT1 = new CPU3D_Matrix();
+			animT1.makeTranslationMatrix(-bone.getPositionWorld().getX(), -bone.getPositionWorld().getY(), -bone.getPositionWorld().getZ());
+
+			let animT2 = new CPU3D_Matrix();
+			animT2.makeTranslationMatrix(bone.getPositionWorld().getX(), bone.getPositionWorld().getY(), bone.getPositionWorld().getZ());
+			
+			let animR = new CPU3D_Matrix();
+			animR = CPU3D_Matrix.convertQuatToMatrix(key.getRotation().getX(), key.getRotation().getY(), key.getRotation().getZ(), key.getRotation().getW())
+
+			let animS = new CPU3D_Matrix();
+			animS.makeScaleMatrix(key.getScale().getX(), key.getScale().getY(), key.getScale().getZ());
+
+			matT.multiplyWithMatrix(animT2);
 			matT.multiplyWithMatrix(animT);
+			matT.multiplyWithMatrix(animR);
+			matT.multiplyWithMatrix(animS);
+			matT.multiplyWithMatrix(animT1);
 			boneMatrixs[i] = matT;
 		}
 
 		//calculate bone heiarchy
+		let boneMatrix_temp = new Array(boneMatrixs.length);
 		for(let i = 0; i < this.bones.length; i++) {
+			let mats = []
 
+			let parentIndex = i;
+			while(parentIndex > -1) {
+				mats.push(parentIndex);
+				parentIndex = this.bones[parentIndex].getParentIndex();
+			}
+
+			let mat = new CPU3D_Matrix();
+			for(let i = mats.length-1; i >= 0; i--) {
+				mat.multiplyWithMatrix(boneMatrixs[mats[i]]);
+			}
+
+			boneMatrix_temp[i] = mat;
 		}
 
-		return boneMatrixs;
+		return boneMatrix_temp;
 	}
 }
